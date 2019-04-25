@@ -449,6 +449,10 @@ public class TransactionContext implements XAResource {
 
             // Find out if the server wants to commit or rollback.
             IntegerResponse response = (IntegerResponse)syncSendPacketWithInterruptionHandling(info);
+            if (response.getResult() == XAResource.XA_RDONLY) {
+                //wrong answer, see https://issues.apache.org/jira/projects/ARTEMIS/issues/ARTEMIS-1985
+                response.setResult(XAResource.XA_OK);
+            }
             if (XAResource.XA_RDONLY == response.getResult()) {
                 // transaction stops now, may be syncs that need a callback
 	        	synchronized(ENDED_XA_TRANSACTION_CONTEXTS) {
